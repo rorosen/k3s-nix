@@ -1,0 +1,4 @@
+result
+result-*
+**.qcow2
+.nixos-test-history
