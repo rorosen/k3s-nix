@@ -58,12 +58,13 @@ in
     image = lib.mkOption {
       type = lib.types.package;
       default = image;
+      description = "The Grafana container image to use";
     };
   };
 
   config = lib.mkIf cfg.enable {
     services.k3s = {
-      images = lib.mkIf config.k3sNix.airGap.enable [ cfg.image ];
+      images = [ cfg.image ];
       manifests = {
         grafana-deployment.content = {
           apiVersion = "apps/v1";
@@ -89,7 +90,7 @@ in
                 containers = [
                   {
                     name = "grafana";
-                    image = with config.k3sNix.grafana.image; "${imageName}:${imageTag}";
+                    image = with cfg.image; "${imageName}:${imageTag}";
                     ports = [
                       {
                         containerPort = 3000;
@@ -155,18 +156,6 @@ in
             storageClassName = "local-path";
             resources.requests.storage = "1Gi";
           };
-        };
-        grafana-config.content = {
-          apiVersion = "v1";
-          kind = "ConfigMap";
-          metadata = {
-            name = "grafana-config";
-          };
-          data."grafana.ini" = ''
-            check_for_plugin_updates = false
-            check_for_updates = false
-            reporting_enabled = false
-          '';
         };
         grafana-datasources.content = {
           apiVersion = "v1";

@@ -19,12 +19,13 @@ in
     image = lib.mkOption {
       type = lib.types.package;
       default = image;
+      description = "The Prometheus container image to use";
     };
   };
 
   config = lib.mkIf cfg.enable {
     services.k3s = {
-      images = lib.mkIf config.k3sNix.airGap.enable [ cfg.image ];
+      images = [ cfg.image ];
       manifests = {
         prometheus-cluster-role.content = {
           apiVersion = "rbac.authorization.k8s.io/v1";
@@ -189,7 +190,7 @@ in
                 containers = [
                   {
                     name = "prometheus";
-                    image = with config.k3sNix.prometheus.image; "${imageName}:${imageTag}";
+                    image = with cfg.image; "${imageName}:${imageTag}";
                     args = [
                       "--config.file=/etc/prometheus/prometheus.yaml"
                       "--storage.tsdb.path=/prometheus/"

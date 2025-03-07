@@ -15,14 +15,15 @@
 
   outputs =
     inputs@{ self, flake-parts, ... }:
+    let
+      nixosModules = import ./modules;
+    in
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [
         "x86_64-linux"
         "aarch64-linux"
       ];
-      flake = {
-        nixosModules = import ./modules;
-      };
+      flake = { inherit nixosModules; };
       perSystem =
         { pkgs, system, ... }:
         {
@@ -30,11 +31,11 @@
             let
               eval = import "${pkgs.path}/nixos/lib/eval-config.nix" {
                 inherit pkgs system;
-                modules = [ ./configuration.nix ];
+                modules = [ ./qemu.nix ];
               };
             in
             eval.config.system.build.qcow;
-          checks = { };
+          checks = import ./tests { inherit pkgs nixosModules; };
         };
     };
 

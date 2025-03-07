@@ -19,12 +19,13 @@ in
     image = lib.mkOption {
       type = lib.types.package;
       default = image;
+      description = "The node exporter container image to use";
     };
   };
 
   config = lib.mkIf cfg.enable {
     services.k3s = {
-      images = lib.mkIf config.k3sNix.airGap.enable [ cfg.image ];
+      images = [ cfg.image ];
       manifests = {
         node-exporter-daemonset.content = {
           apiVersion = "apps/v1";
@@ -54,7 +55,7 @@ in
                 containers = [
                   {
                     name = "node-exporter";
-                    image = with config.k3sNix.nodeExporter.image; "${imageName}:${imageTag}";
+                    image = with cfg.image; "${imageName}:${imageTag}";
                     args = [
                       "--path.sysfs=/host/sys"
                       "--path.rootfs=/host/root"
