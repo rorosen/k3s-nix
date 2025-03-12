@@ -11,18 +11,25 @@
       url = "github:edolstra/flake-compat";
       flake = false;
     };
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
-    inputs@{ self, flake-parts, ... }:
+    inputs@{
+      self,
+      nixpkgs,
+      flake-parts,
+      sops-nix,
+      ...
+    }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [
         "x86_64-linux"
         "aarch64-linux"
       ];
-      flake = {
-        nixosModules = import ./modules;
-      };
       perSystem =
         { pkgs, system, ... }:
         {
@@ -30,12 +37,15 @@
             let
               eval = import "${pkgs.path}/nixos/lib/eval-config.nix" {
                 inherit pkgs system;
-                modules = [ ./configuration.nix ];
+                modules = [ ./qemu.nix ];
+                specialArgs = { inherit inputs; };
               };
             in
             eval.config.system.build.qcow;
-          checks = { };
+          checks = import ./tests { inherit pkgs sops-nix; };
+          devShells.default = pkgs.mkShell {
+            SOPS_AGE_KEY_FILE = "./keys/age.txt";
+          };
         };
     };
-
 }

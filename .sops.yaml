@@ -1,0 +1,9 @@
+keys:
+  - &user age14z79rakkhfe3eupz8t9nj7ajxt9hts2jfaa38a0jkup5k04tt4nqnlvfh6
+  - &device age1vuxznzl6jagtdw8rs64q75vsan80pslrn8p72v47khpl7mde44qsukrq78
+creation_rules:
+  - path_regex: secrets.yaml$
+    key_groups:
+      - age:
+          - *user
+          - *device
