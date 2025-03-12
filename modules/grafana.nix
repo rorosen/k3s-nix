@@ -1,12 +1,9 @@
 {
   config,
-  lib,
   pkgs,
   ...
 }:
 let
-  cfg = config.k3sNix.grafana;
-  # toYaml = attrs: with builtins; readFile ((pkgs.formats.yaml { }).generate "useless.yaml" attrs);
   image = pkgs.dockerTools.pullImage {
     imageName = "docker.io/grafana/grafana";
     imageDigest = "sha256:5781759b3d27734d4d548fcbaf60b1180dbf4290e708f01f292faa6ae764c5e6";
@@ -30,9 +27,7 @@ let
       }
     ];
   };
-  datasources = lib.optionalAttrs config.k3sNix.prometheus.enable {
-    "prometheus.yaml" = builtins.toJSON prometheusDatasource;
-  };
+  datasources."prometheus.yaml" = builtins.toJSON prometheusDatasource;
   dashboardProvider = {
     apiVersion = 1;
     providers = [
@@ -48,167 +43,238 @@ let
     url = "https://grafana.com/api/dashboards/1860/revisions/37/download";
     hash = "sha256-1DE1aaanRHHeCOMWDGdOS1wBXxOF84UXAjJzT5Ek6mM=";
   };
-  dashboards = lib.optionalAttrs config.k3sNix.nodeExporter.enable {
-    "node-exporter.json" = builtins.readFile nodeExporterDashboard;
-  };
+  dashboards."node-exporter.json" = builtins.readFile nodeExporterDashboard;
 in
 {
-  options.k3sNix.grafana = {
-    enable = lib.mkEnableOption "the Grafana deployment";
-    image = lib.mkOption {
-      type = lib.types.package;
-      default = image;
-    };
-  };
-
-  config = lib.mkIf cfg.enable {
-    services.k3s = {
-      images = lib.mkIf config.k3sNix.airGap.enable [ cfg.image ];
-      manifests = {
-        grafana-deployment.content = {
-          apiVersion = "apps/v1";
-          kind = "Deployment";
-          metadata = {
-            name = "grafana";
+  services.k3s = {
+    images = [ image ];
+    manifests = {
+      grafana-deployment.content = {
+        apiVersion = "apps/v1";
+        kind = "Deployment";
+        metadata = {
+          name = "grafana";
+          namespace = "default";
+        };
+        spec = {
+          replicas = 1;
+          selector = {
+            matchLabels = {
+              app = "grafana";
+            };
           };
-          spec = {
-            replicas = 1;
-            selector = {
-              matchLabels = {
+          template = {
+            metadata = {
+              name = "grafana";
+              namespace = "default";
+              labels = {
                 app = "grafana";
               };
             };
-            template = {
-              metadata = {
-                name = "grafana";
-                labels = {
-                  app = "grafana";
-                };
-              };
-              spec = {
-                containers = [
-                  {
-                    name = "grafana";
-                    image = with config.k3sNix.grafana.image; "${imageName}:${imageTag}";
-                    ports = [
-                      {
-                        containerPort = 3000;
-                      }
-                    ];
-                    volumeMounts = [
-                      {
-                        mountPath = "/var/lib/grafana";
-                        name = "storage";
-                      }
-                      {
-                        mountPath = "/etc/grafana/provisioning/datasources";
-                        name = "datasources";
-                        readOnly = true;
-                      }
-                      {
-                        mountPath = "/etc/grafana/provisioning/dashboards";
-                        name = "dashboards-provider";
-                        readOnly = true;
-                      }
-                      {
-                        mountPath = "/var/lib/grafana/dashboards";
-                        name = "dashboards";
-                        readOnly = true;
-                      }
-                    ];
-                  }
-                ];
-                volumes = [
-                  {
-                    name = "storage";
-                    persistentVolumeClaim.claimName = "grafana";
-                  }
-                  {
-                    name = "datasources";
-                    configMap = {
-                      name = "grafana-datasources";
+            spec = {
+              containers = [
+                {
+                  name = "grafana";
+                  image = "${image.imageName}:${image.imageTag}";
+                  env = [
+                    {
+                      name = "GF_ANALYTICS_CHECK_FOR_UPDATES";
+                      value = "false";
+                    }
+                    {
+                      name = "GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES";
+                      value = "false";
+                    }
+                    {
+                      name = "GF_ANALYTICS_REPORTING_ENABLED";
+                      value = "false";
+                    }
+                    {
+                      name = "GF_PLUGINS_PLUGIN_ADMIN_ENABLED";
+                      value = "false";
+                    }
+                    {
+                      name = "GF_PLUGINS_PUBLIC_KEY_RETRIEVAL_DISABLED";
+                      value = "true";
+                    }
+                    {
+                      name = "GF_SECURITY_ADMIN_USER";
+                      value = "admin";
+                    }
+                    {
+                      name = "GF_SECURITY_ADMIN_PASSWORD";
+                      valueFrom.secretKeyRef = {
+                        name = "grafana-admin";
+                        key = "password";
+                      };
+                    }
+                  ];
+                  ports = [
+                    {
+                      containerPort = 3000;
+                    }
+                  ];
+                  volumeMounts = [
+                    {
+                      mountPath = "/var/lib/grafana";
+                      name = "storage";
+                    }
+                    {
+                      mountPath = "/etc/grafana/provisioning/datasources";
+                      name = "datasources";
+                      readOnly = true;
+                    }
+                    {
+                      mountPath = "/etc/grafana/provisioning/dashboards";
+                      name = "dashboards-provider";
+                      readOnly = true;
+                    }
+                    {
+                      mountPath = "/var/lib/grafana/dashboards";
+                      name = "dashboards";
+                      readOnly = true;
+                    }
+                  ];
+                  livenessProbe = {
+                    httpGet = {
+                      path = "/api/health";
+                      port = 3000;
                     };
-                  }
-                  {
-                    name = "dashboards-provider";
-                    configMap = {
-                      name = "grafana-dashboards-provider";
+                    timeoutSeconds = 30;
+                    failureThreshold = 1;
+                  };
+                  startupProbe = {
+                    httpGet = {
+                      path = "/api/health";
+                      port = 3000;
                     };
-                  }
-                  {
-                    name = "dashboards";
-                    configMap = {
-                      name = "grafana-dashboards";
+                    timeoutSeconds = 30;
+                    failureThreshold = 10;
+                  };
+                  readinessProbe = {
+                    httpGet = {
+                      path = "/api/health";
+                      port = 3000;
                     };
-                  }
-                ];
-              };
+                  };
+                }
+              ];
+              volumes = [
+                {
+                  name = "storage";
+                  persistentVolumeClaim.claimName = "grafana";
+                }
+                {
+                  name = "datasources";
+                  configMap = {
+                    name = "grafana-datasources";
+                  };
+                }
+                {
+                  name = "dashboards-provider";
+                  configMap = {
+                    name = "grafana-dashboards-provider";
+                  };
+                }
+                {
+                  name = "dashboards";
+                  configMap = {
+                    name = "grafana-dashboards";
+                  };
+                }
+              ];
             };
           };
         };
-        grafana-pvc.content = {
-          apiVersion = "v1";
-          kind = "PersistentVolumeClaim";
-          metadata.name = "grafana";
-          spec = {
-            accessModes = [ "ReadWriteOnce" ];
-            storageClassName = "local-path";
-            resources.requests.storage = "1Gi";
-          };
+      };
+      grafana-pvc.content = {
+        apiVersion = "v1";
+        kind = "PersistentVolumeClaim";
+        metadata = {
+          name = "grafana";
+          namespace = "default";
         };
-        grafana-config.content = {
-          apiVersion = "v1";
-          kind = "ConfigMap";
-          metadata = {
-            name = "grafana-config";
-          };
-          data."grafana.ini" = ''
-            check_for_plugin_updates = false
-            check_for_updates = false
-            reporting_enabled = false
-          '';
+        spec = {
+          accessModes = [ "ReadWriteOnce" ];
+          storageClassName = "local-path";
+          resources.requests.storage = "1Gi";
         };
-        grafana-datasources.content = {
-          apiVersion = "v1";
-          kind = "ConfigMap";
-          metadata = {
-            name = "grafana-datasources";
-          };
-          data = datasources;
+      };
+      grafana-datasources.content = {
+        apiVersion = "v1";
+        kind = "ConfigMap";
+        metadata = {
+          name = "grafana-datasources";
+          namespace = "default";
         };
-        grafana-dashboards-provider.content = {
-          apiVersion = "v1";
-          kind = "ConfigMap";
-          metadata = {
-            name = "grafana-dashboards-provider";
-          };
-          data."demo-dashboards.yaml" = builtins.toJSON dashboardProvider;
+        data = datasources;
+      };
+      grafana-dashboards-provider.content = {
+        apiVersion = "v1";
+        kind = "ConfigMap";
+        metadata = {
+          name = "grafana-dashboards-provider";
+          namespace = "default";
         };
-        grafana-dashboards.content = {
-          apiVersion = "v1";
-          kind = "ConfigMap";
-          metadata = {
-            name = "grafana-dashboards";
-          };
-          data = dashboards;
+        data."demo-dashboards.yaml" = builtins.toJSON dashboardProvider;
+      };
+      grafana-dashboards.content = {
+        apiVersion = "v1";
+        kind = "ConfigMap";
+        metadata = {
+          name = "grafana-dashboards";
+          namespace = "default";
         };
-        grafana-service.content = {
-          apiVersion = "v1";
-          kind = "Service";
-          metadata = {
-            name = "grafana";
+        data = dashboards;
+      };
+      grafana-service.content = {
+        apiVersion = "v1";
+        kind = "Service";
+        metadata = {
+          name = "grafana";
+          namespace = "default";
+        };
+        spec = {
+          selector = {
+            app = "grafana";
           };
-          spec = {
-            selector = {
-              app = "grafana";
-            };
-            ports = [
-              {
-                port = 80;
-                targetPort = 3000;
-              }
-            ];
-          };
+          ports = [
+            {
+              port = 80;
+              targetPort = 3000;
+            }
+          ];
+        };
+      };
+      grafana-ingress.content = {
+        apiVersion = "networking.k8s.io/v1";
+        kind = "Ingress";
+        metadata = {
+          name = "grafana";
+          namespace = "default";
+        };
+        spec = {
+          ingressClassName = "traefik";
+          rules = [
+            ({
+              http = {
+                paths = [
+                  {
+                    path = "/";
+                    pathType = "Prefix";
+                    backend = {
+                      service = {
+                        inherit (config.services.k3s.manifests.grafana-service.content.metadata) name;
+                        port = {
+                          number = 80;
+                        };
+                      };
+                    };
+                  }
+                ];
+              };
+            })
+          ];
         };
       };
     };
