@@ -18,26 +18,13 @@ in
         apiVersion = "apps/v1";
         kind = "DaemonSet";
         metadata = {
-          labels = {
-            "app.kubernetes.io/component" = "exporter";
-            "app.kubernetes.io/name" = "node-exporter";
-          };
           name = "node-exporter";
+          labels."app.kubernetes.io/name" = "node-exporter";
         };
         spec = {
-          selector = {
-            matchLabels = {
-              "app.kubernetes.io/component" = "exporter";
-              "app.kubernetes.io/name" = "node-exporter";
-            };
-          };
+          selector.matchLabels."app.kubernetes.io/name" = "node-exporter";
           template = {
-            metadata = {
-              labels = {
-                "app.kubernetes.io/component" = "exporter";
-                "app.kubernetes.io/name" = "node-exporter";
-              };
-            };
+            metadata.labels."app.kubernetes.io/name" = "node-exporter";
             spec = {
               containers = [
                 {
@@ -51,11 +38,7 @@ in
                     "--collector.filesystem.ignored-mount-points=^/(dev|proc|sys|var/lib/docker/.+|var/lib/kubelet/pods/.+)($|/)"
                     "--collector.netclass.ignored-devices=^(veth.*)$"
                   ];
-                  ports = [
-                    {
-                      containerPort = 9100;
-                    }
-                  ];
+                  ports = [ { containerPort = 9100; } ];
                   volumeMounts = [
                     {
                       mountPath = "/host/sys";
@@ -75,15 +58,11 @@ in
               hostNetwork = true;
               volumes = [
                 {
-                  hostPath = {
-                    path = "/sys";
-                  };
+                  hostPath.path = "/sys";
                   name = "sys";
                 }
                 {
-                  hostPath = {
-                    path = "/";
-                  };
+                  hostPath.path = "/";
                   name = "root";
                 }
               ];
@@ -94,14 +73,9 @@ in
       node-exporter-service.content = {
         kind = "Service";
         apiVersion = "v1";
-        metadata = {
-          name = "node-exporter";
-        };
+        metadata.name = "node-exporter";
         spec = {
-          selector = {
-            "app.kubernetes.io/component" = "exporter";
-            "app.kubernetes.io/name" = "node-exporter";
-          };
+          selector."app.kubernetes.io/name" = "node-exporter";
           ports = [
             {
               name = "node-exporter";

@@ -43,7 +43,14 @@ let
     url = "https://grafana.com/api/dashboards/1860/revisions/37/download";
     hash = "sha256-1DE1aaanRHHeCOMWDGdOS1wBXxOF84UXAjJzT5Ek6mM=";
   };
-  dashboards."node-exporter.json" = builtins.readFile nodeExporterDashboard;
+  k8sApiServerDashboard = pkgs.fetchurl {
+    url = "https://grafana.com/api/dashboards/15761/revisions/19/download";
+    hash = "sha256-j9npTKREjw+sPnAuqnzG+iHrzA9N/TfDq8y3Q6Rceyg=";
+  };
+  dashboards = {
+    "node-exporter.json" = builtins.readFile nodeExporterDashboard;
+    "k8s-system-api-server.json" = builtins.readFile k8sApiServerDashboard;
+  };
 in
 {
   services.k3s = {
@@ -54,23 +61,13 @@ in
         kind = "Deployment";
         metadata = {
           name = "grafana";
-          namespace = "default";
+          labels."app.kubernetes.io/name" = "grafana";
         };
         spec = {
           replicas = 1;
-          selector = {
-            matchLabels = {
-              app = "grafana";
-            };
-          };
+          selector.matchLabels."app.kubernetes.io/name" = "grafana";
           template = {
-            metadata = {
-              name = "grafana";
-              namespace = "default";
-              labels = {
-                app = "grafana";
-              };
-            };
+            metadata.labels."app.kubernetes.io/name" = "grafana";
             spec = {
               containers = [
                 {
@@ -109,11 +106,7 @@ in
                       };
                     }
                   ];
-                  ports = [
-                    {
-                      containerPort = 3000;
-                    }
-                  ];
+                  ports = [ { containerPort = 3000; } ];
                   volumeMounts = [
                     {
                       mountPath = "/var/lib/grafana";
@@ -151,11 +144,9 @@ in
                     timeoutSeconds = 30;
                     failureThreshold = 10;
                   };
-                  readinessProbe = {
-                    httpGet = {
-                      path = "/api/health";
-                      port = 3000;
-                    };
+                  readinessProbe.httpGet = {
+                    path = "/api/health";
+                    port = 3000;
                   };
                 }
               ];
@@ -166,21 +157,15 @@ in
                 }
                 {
                   name = "datasources";
-                  configMap = {
-                    name = "grafana-datasources";
-                  };
+                  configMap.name = "grafana-datasources";
                 }
                 {
                   name = "dashboards-provider";
-                  configMap = {
-                    name = "grafana-dashboards-provider";
-                  };
+                  configMap.name = "grafana-dashboards-provider";
                 }
                 {
                   name = "dashboards";
-                  configMap = {
-                    name = "grafana-dashboards";
-                  };
+                  configMap.name = "grafana-dashboards";
                 }
               ];
             };
@@ -192,7 +177,7 @@ in
         kind = "PersistentVolumeClaim";
         metadata = {
           name = "grafana";
-          namespace = "default";
+          labels."app.kubernetes.io/name" = "grafana";
         };
         spec = {
           accessModes = [ "ReadWriteOnce" ];
@@ -205,7 +190,7 @@ in
         kind = "ConfigMap";
         metadata = {
           name = "grafana-datasources";
-          namespace = "default";
+          labels."app.kubernetes.io/name" = "grafana";
         };
         data = datasources;
       };
@@ -214,7 +199,7 @@ in
         kind = "ConfigMap";
         metadata = {
           name = "grafana-dashboards-provider";
-          namespace = "default";
+          labels."app.kubernetes.io/name" = "grafana";
         };
         data."demo-dashboards.yaml" = builtins.toJSON dashboardProvider;
       };
@@ -223,7 +208,7 @@ in
         kind = "ConfigMap";
         metadata = {
           name = "grafana-dashboards";
-          namespace = "default";
+          labels."app.kubernetes.io/name" = "grafana";
         };
         data = dashboards;
       };
@@ -232,12 +217,10 @@ in
         kind = "Service";
         metadata = {
           name = "grafana";
-          namespace = "default";
+          labels."app.kubernetes.io/name" = "grafana";
         };
         spec = {
-          selector = {
-            app = "grafana";
-          };
+          selector."app.kubernetes.io/name" = "grafana";
           ports = [
             {
               port = 80;
@@ -264,10 +247,8 @@ in
                     pathType = "Prefix";
                     backend = {
                       service = {
-                        inherit (config.services.k3s.manifests.grafana-service.content.metadata) name;
-                        port = {
-                          number = 80;
-                        };
+                        name = "grafana";
+                        port.number = 80;
                       };
                     };
                   }

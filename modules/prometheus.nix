@@ -19,12 +19,11 @@ in
         kind = "ClusterRole";
         metadata = {
           name = "prometheus";
+          labels."app.kubernetes.io/name" = "prometheus";
         };
         rules = [
           {
-            apiGroups = [
-              ""
-            ];
+            apiGroups = [ "" ];
             resources = [
               "nodes"
               "nodes/proxy"
@@ -39,12 +38,8 @@ in
             ];
           }
           {
-            apiGroups = [
-              "extensions"
-            ];
-            resources = [
-              "ingresses"
-            ];
+            apiGroups = [ "extensions" ];
+            resources = [ "ingresses" ];
             verbs = [
               "get"
               "list"
@@ -52,12 +47,8 @@ in
             ];
           }
           {
-            nonResourceURLs = [
-              "/metrics"
-            ];
-            verbs = [
-              "get"
-            ];
+            nonResourceURLs = [ "/metrics" ];
+            verbs = [ "get" ];
           }
         ];
       };
@@ -66,6 +57,7 @@ in
         kind = "ClusterRoleBinding";
         metadata = {
           name = "prometheus";
+          labels."app.kubernetes.io/name" = "prometheus";
         };
         roleRef = {
           apiGroup = "rbac.authorization.k8s.io";
@@ -83,16 +75,17 @@ in
       prometheus-serviceaccount.content = {
         apiVersion = "v1";
         kind = "ServiceAccount";
-        metadata.name = "prometheus";
+        metadata = {
+          name = "prometheus";
+          labels."app.kubernetes.io/name" = "prometheus";
+        };
       };
       prometheus-config-map.content = {
         apiVersion = "v1";
         kind = "ConfigMap";
         metadata = {
           name = "prometheus-server-conf";
-          labels = {
-            name = "prometheus-server-conf";
-          };
+          labels."app.kubernetes.io/name" = "prometheus";
         };
         data."prometheus.yaml" =
           # yaml
@@ -102,6 +95,7 @@ in
               evaluation_interval: 5s
             scrape_configs:
               - job_name: 'node-exporter'
+                scheme: http
                 kubernetes_sd_configs:
                 - role: node
                 relabel_configs:
@@ -109,9 +103,6 @@ in
                   regex: ^(.*):\d+$
                   target_label: __address__
                   replacement: $1:9100
-                - target_label: __scheme__
-                  replacement: http
-                # Host name
                 - source_labels: [__meta_kubernetes_node_name]
                   target_label: instance
               - job_name: 'kubernetes-apiservers'
@@ -122,41 +113,12 @@ in
                   ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
                 bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
                 relabel_configs:
-                - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+                - source_labels:
+                  - __meta_kubernetes_namespace
+                  - __meta_kubernetes_service_name
+                  - __meta_kubernetes_endpoint_port_name
                   action: keep
                   regex: default;kubernetes;https
-              - job_name: 'kubernetes-nodes'
-                scheme: https
-                tls_config:
-                  ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-                bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
-                kubernetes_sd_configs:
-                - role: node
-                relabel_configs:
-                - action: labelmap
-                  regex: __meta_kubernetes_node_label_(.+)
-                - target_label: __address__
-                  replacement: kubernetes.default.svc:443
-                - source_labels: [__meta_kubernetes_node_name]
-                  regex: (.+)
-                  target_label: __metrics_path__
-                  replacement: /api/v1/nodes/''${1}/proxy/metrics
-              - job_name: 'kubernetes-cadvisor'
-                scheme: https
-                tls_config:
-                  ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-                bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
-                kubernetes_sd_configs:
-                - role: node
-                relabel_configs:
-                - action: labelmap
-                  regex: __meta_kubernetes_node_label_(.+)
-                - target_label: __address__
-                  replacement: kubernetes.default.svc:443
-                - source_labels: [__meta_kubernetes_node_name]
-                  regex: (.+)
-                  target_label: __metrics_path__
-                  replacement: /api/v1/nodes/''${1}/proxy/metrics/cadvisor
           '';
       };
       prometheus-deployment.content = {
@@ -164,23 +126,13 @@ in
         kind = "Deployment";
         metadata = {
           name = "prometheus";
-          labels = {
-            app = "prometheus-server";
-          };
+          labels."app.kubernetes.io/name" = "prometheus";
         };
         spec = {
           replicas = 1;
-          selector = {
-            matchLabels = {
-              app = "prometheus-server";
-            };
-          };
+          selector.matchLabels."app.kubernetes.io/name" = "prometheus";
           template = {
-            metadata = {
-              labels = {
-                app = "prometheus-server";
-              };
-            };
+            metadata.labels."app.kubernetes.io/name" = "prometheus";
             spec = {
               containers = [
                 {
@@ -190,11 +142,7 @@ in
                     "--config.file=/etc/prometheus/prometheus.yaml"
                     "--storage.tsdb.path=/prometheus/"
                   ];
-                  ports = [
-                    {
-                      containerPort = 9090;
-                    }
-                  ];
+                  ports = [ { containerPort = 9090; } ];
                   volumeMounts = [
                     {
                       mountPath = "/prometheus";
@@ -216,9 +164,7 @@ in
                 }
                 {
                   name = "config";
-                  configMap = {
-                    name = "prometheus-server-conf";
-                  };
+                  configMap.name = "prometheus-server-conf";
                 }
               ];
             };
@@ -228,7 +174,10 @@ in
       prometheus-pvc.content = {
         apiVersion = "v1";
         kind = "PersistentVolumeClaim";
-        metadata.name = "prometheus";
+        metadata = {
+          name = "prometheus";
+          labels."app.kubernetes.io/name" = "prometheus";
+        };
         spec = {
           accessModes = [ "ReadWriteOnce" ];
           storageClassName = "local-path";
@@ -240,11 +189,10 @@ in
         kind = "Service";
         metadata = {
           name = "prometheus";
+          labels."app.kubernetes.io/name" = "prometheus";
         };
         spec = {
-          selector = {
-            app = "prometheus-server";
-          };
+          selector."app.kubernetes.io/name" = "prometheus";
           ports = [
             {
               name = "http";

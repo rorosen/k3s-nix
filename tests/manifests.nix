@@ -1,5 +1,5 @@
 {
-  name = "k3snix-multi-node";
+  name = "k3snix-manifests";
   passthru.platforms = [
     "x86_64-linux"
     "aarch64-linux"
@@ -65,5 +65,6 @@
       start_all()
       server.wait_for_unit("k3s")
       agent.wait_for_unit("k3s")
+      # TODO
     '';
 }
