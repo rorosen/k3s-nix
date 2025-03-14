@@ -33,15 +33,25 @@
       perSystem =
         { pkgs, system, ... }:
         {
-          packages.qcow2 =
+          packages =
             let
-              eval = import "${pkgs.path}/nixos/lib/eval-config.nix" {
-                inherit pkgs system;
-                modules = [ ./qemu.nix ];
-                specialArgs = { inherit inputs; };
-              };
+              mkNode =
+                module:
+                import "${pkgs.path}/nixos/lib/eval-config.nix" {
+                  inherit pkgs system;
+                  modules = [
+                    sops-nix.nixosModules.sops
+                    ./qemu.nix
+                    module
+                  ];
+                  specialArgs = { inherit inputs; };
+                };
             in
-            eval.config.system.build.qcow;
+            {
+              agent = (mkNode ./agent.nix).config.system.build.qcow;
+              server = (mkNode ./server.nix).config.system.build.qcow;
+
+            };
           checks = import ./tests { inherit pkgs sops-nix; };
           devShells.default = pkgs.mkShell {
             SOPS_AGE_KEY_FILE = "./keys/age.txt";

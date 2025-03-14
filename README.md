@@ -19,7 +19,7 @@
 
 This repository shows how to set up a lightweight k3s cluster together with Kubernetes resources in
 pure Nix. Manage infrastructure and deployments from a single repository with a single command.
-Great fit for home labs, air-gapped environments, CI/CD pipelines, production, and more.
+Great fit for home labs, air-gapped environments, CI/CD pipelines, etc.
 
 ```bash
 $ kubectl get nodes -owide
@@ -61,7 +61,7 @@ specified in the configuration.
 
 ## How it works
 
-K3s has some nice features that allow to configure Kubernetes resources directly via the filesystem
+K3s has some nice features that allow to manage Kubernetes resources directly via the filesystem
 and the NixOS k3s module provides options to use them in your NixOS configuration. For instance, the
 [`services.k3s.manifests`](https://search.nixos.org/options?channel=unstable&show=services.k3s.manifests&from=0&size=50&sort=relevance&type=packages&query=k3s)
 option lets you configure
@@ -95,7 +95,7 @@ prometheus-67dcbf6f46-g47gf      1/1     Running     0          115s
 ```
 
 The testing driver also forwards ports `80` and `443` to `20080` and `20443` respectively. Visit the
-Grafana deployment at <http://localhost:20080/grafana> (username `admin`, password `secret`) and the
+Grafana deployment at <http://localhost:20080/grafana> (username `admin`, password `k3snix`) and the
 simple nginx at <http://localhost:20080/hello>. Grafana is provisioned with two dashboards,
 Kubernetes API server and Node Exporter Full.
 

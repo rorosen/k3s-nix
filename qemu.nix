@@ -9,10 +9,7 @@ let
   isx86_64Linux = pkgs.stdenv.system == "x86_64-linux";
 in
 {
-  imports = [
-    "${modulesPath}/profiles/qemu-guest.nix"
-    ./configuration.nix
-  ];
+  imports = [ "${modulesPath}/profiles/qemu-guest.nix" ];
 
   fileSystems."/" = {
     device = "/dev/disk/by-label/nixos";
