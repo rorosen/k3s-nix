@@ -31,7 +31,8 @@ server   Ready    control-plane,master   129m   v1.32.1+k3s1   192.168.1.2   <no
 This repository should be considered an example that shows how everything fits together. It provides
 a configuration that deploys a [Node exporter](https://github.com/prometheus/node_exporter)
 DaemonSet, a [Prometheus](https://prometheus.io/) Deployment, a [Grafana](https://grafana.com/)
-Deployment and a simple [nginx](https://nginx.org/en/) Helm chart.
+Deployment and a simple [nginx](https://nginx.org/en/) Helm chart. Additionally, it deploys secrets
+via [sops-nix](https://github.com/Mic92/sops-nix).
 
 ### Features
 
@@ -80,7 +81,7 @@ This spins up two virtual machines, a server node and an agent node, and forward
 host (see [./tests/interactive.nix](./tests/interactive.nix)) so you can interact with the test
 nodes. Run `ssh root@localhost -p 20022` to access the server node (use port `10022` for the agent)
 and run `kubectl` commands to to explore the cluster. Depending on your hardware, everything is up
-and running after approximately 2 minutes (Grafana takes a while to start up...).
+and running after approximately 2 minutes (Grafana takes a while to get ready...).
 
 ```bash
 $ kubectl get pods
