@@ -7,7 +7,7 @@ let
   image = pkgs.dockerTools.pullImage {
     imageName = "docker.io/grafana/grafana";
     imageDigest = "sha256:5781759b3d27734d4d548fcbaf60b1180dbf4290e708f01f292faa6ae764c5e6";
-    sha256 = "sha256-iGjaomEOMNgixw8iJC0c4HWhUBXcKZcsnV1XfB+ctMs=";
+    hash = "sha256-iGjaomEOMNgixw8iJC0c4HWhUBXcKZcsnV1XfB+ctMs=";
     finalImageTag = "11.5.1";
   };
   prometheusServiceCfg = config.services.k3s.manifests.prometheus-service.content;
@@ -93,6 +93,10 @@ in
                     {
                       name = "GF_PLUGINS_PUBLIC_KEY_RETRIEVAL_DISABLED";
                       value = "true";
+                    }
+                    {
+                      name = "GF_SERVER_ROOT_URL";
+                      value = "/grafana";
                     }
                     {
                       name = "GF_SECURITY_ADMIN_USER";
@@ -234,7 +238,8 @@ in
         kind = "Ingress";
         metadata = {
           name = "grafana";
-          namespace = "default";
+          annotations."traefik.ingress.kubernetes.io/router.middlewares" =
+            "default-grafana-strip-prefix@kubernetescrd";
         };
         spec = {
           ingressClassName = "traefik";
@@ -243,7 +248,7 @@ in
               http = {
                 paths = [
                   {
-                    path = "/";
+                    path = "/grafana";
                     pathType = "Prefix";
                     backend = {
                       service = {
@@ -256,6 +261,14 @@ in
               };
             })
           ];
+        };
+      };
+      grafana-strip-prefix.content = {
+        apiVersion = "traefik.io/v1alpha1";
+        kind = "Middleware";
+        metadata.name = "grafana-strip-prefix";
+        spec = {
+          stripPrefix.prefixes = [ "/grafana" ];
         };
       };
     };

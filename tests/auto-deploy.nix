@@ -1,5 +1,5 @@
 {
-  name = "k3snix-manifests";
+  name = "k3snix-auto-deploy";
   passthru.platforms = [
     "x86_64-linux"
     "aarch64-linux"
@@ -14,6 +14,7 @@
           ../modules/prometheus.nix
           ../modules/node-exporter.nix
           ../modules/secrets.nix
+          ../modules/helm-hello-world.nix
         ];
         networking.firewall.enable = false;
         environment.etc = {
