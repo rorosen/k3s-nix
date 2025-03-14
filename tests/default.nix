@@ -18,6 +18,11 @@
           # testing driver sets a default route via dev eth0. However, in test setups we
           # have to use eth1 on all nodes for inter-node communication.
           services.k3s.extraFlags = [ "--flannel-iface eth1" ];
+          # Enable the embedded registry mirror for all registries.
+          environment.etc."rancher/k3s/registries.yaml".text = ''
+            mirrors:
+              "*":
+          '';
         }
       ];
     };

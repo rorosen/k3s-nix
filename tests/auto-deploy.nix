@@ -17,15 +17,9 @@
           ../modules/helm-hello-world.nix
         ];
         networking.firewall.enable = false;
-        environment.etc = {
-          "rancher/k3s/registries.yaml".text = ''
-            mirrors:
-              "*":
-          '';
-          "ssh/ssh_host_ed25519_key" = {
-            source = ../keys/demo_id_ed25519;
-            mode = "0400";
-          };
+        environment.etc."ssh/ssh_host_ed25519_key" = {
+          source = ../keys/demo_id_ed25519;
+          mode = "0400";
         };
         services.k3s = {
           enable = true;
@@ -47,10 +41,6 @@
       }:
       {
         networking.firewall.enable = false;
-        environment.etc."rancher/k3s/registries.yaml".text = ''
-          mirrors:
-            "*":
-        '';
         services.k3s = {
           enable = true;
           role = "agent";

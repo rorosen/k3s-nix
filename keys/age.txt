@@ -1,4 +1,3 @@
-# This file is only for demonstration purposes, you should never commit clear text age keys
-# in version control.
+# This key is only for demonstration purposes.
 # public key: age14z79rakkhfe3eupz8t9nj7ajxt9hts2jfaa38a0jkup5k04tt4nqnlvfh6
 AGE-SECRET-KEY-10R35Z2WWYN4THNV5E35FKZLNM0DUE92PTJ4M98QU0FGNV3DVREDSGE2USJ
