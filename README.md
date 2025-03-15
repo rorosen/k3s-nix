@@ -52,7 +52,7 @@ pipelines, and more.
 Clusters built in this way come fully equipped with everything they need, eliminating the need to
 download anything at runtime. This makes it possible to run clusters in air-gapped environments or
 in NixOS VM tests. However, this approach is optional—you can also choose to omit container images
-from the configuration and let the nodes to download them as needed during runtime.
+from the configuration and let the nodes download them as needed during runtime.
 
 #### :arrows_counterclockwise: Reproducible
 
@@ -99,7 +99,9 @@ server and Node Exporter Full.
 ![grafana node exporter](./grafana-node-exporter.png "Grafana-Node-Exporter")
 
 Alternatively, build qcow2 images with `nix build .#server` and `nix build .#agent` and run them
-with a tool of your choice. You can also install the configurations on real hardware.
+with a tool of your choice. You can also install the configurations on real hardware. Set
+`services.k3s.serverAddr` in [agent.nix](./agent.nix) to the server IP when running outside the
+NixOS test.
 
 ### External access
 
@@ -112,16 +114,24 @@ with `sed -i 's/:6443/:26443/' ~/.kube/config`.
 
 ## Deploy secrets
 
-This uses [sops-nix](https://github.com/Mic92/sops-nix) and its powerful
+> [!IMPORTANT]
+> The keys to decrypt [secrets.yaml](./secrets.yaml) are placed in the [keys](./keys/) directory. In
+> a normal setup you should keep the keys always secret!
+
+This uses [sops-nix](https://github.com/Mic92/sops-nix) and its
 [templates](https://github.com/Mic92/sops-nix?tab=readme-ov-file#templates) feature to deploy
 secrets. The idea is to create templates of Kubernetes secret resources and let sops-nix substitute
 placeholders with the actual secrets at activation time. For an example of how this is implemented,
 see [./modules/secrets.nix](./modules/secrets.nix). This approach also works with other secret
 provisioning tools that support templating and custom paths.
 
+In order to decrypt and change the secrets run `nix develop`, this will set `SOPS_AGE_KEY_FILE` and
+make [sops](https://github.com/getsops/sops) available. Consequently run `sops edit secrets.yaml` to
+change the secrets.
+
 ## Install Helm charts
 
-This approach isn't limited to plain manifest files, you can also install Helm charts via the
+Install Helm charts via the
 [k3s Helm controller](https://docs.k3s.io/helm?_highlight=helm#using-the-helm-controller). See
 [./modules/helm-hello-world.nix](./modules/helm-hello-world.nix) for an example. However, after
 using k3s a while with Nix I definitely prefer writing NixOS modules for deployments instead of

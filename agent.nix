@@ -20,10 +20,11 @@
       # Node exporter
       9100
     ];
+    # Flannel VXLAN
     allowedUDPPorts = [ 8472 ];
   };
 
-  # Allow insecure SSH access just for the demo
+  # Allow insecure SSH access just for the example
   security.pam.services.sshd.allowNullPassword = true;
   services.openssh = {
     enable = true;
@@ -31,7 +32,7 @@
       PermitRootLogin = "yes";
       PermitEmptyPasswords = "yes";
     };
-    # Let the SSH server only use the (insecure) demo key
+
     hostKeys = [
       {
         path = "/etc/ssh/ssh_host_ed25519_key";
@@ -40,9 +41,10 @@
     ];
   };
 
-  # Place the demo SSH key on the node so it can decrypt sops-nix secrets
+  # Place the demo SSH key on the node so it can decrypt sops-nix secrets, this is unsecure and
+  # only done to keep the example simple
   environment.etc."ssh/ssh_host_ed25519_key" = {
-    source = ./keys/server_ed_25519;
+    source = ./keys/agent_ed_25519;
     mode = "0400";
   };
 

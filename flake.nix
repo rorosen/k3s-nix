@@ -54,6 +54,7 @@
             };
           checks = import ./tests { inherit pkgs sops-nix; };
           devShells.default = pkgs.mkShell {
+            packages = [ pkgs.sops ];
             SOPS_AGE_KEY_FILE = "./keys/age.txt";
           };
         };
