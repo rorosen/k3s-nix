@@ -35,5 +35,6 @@ in
     inherit (config.virtualisation) diskSize;
     format = "qcow2";
     partitionTableType = "hybrid";
+    additionalSpace = "1G";
   };
 }

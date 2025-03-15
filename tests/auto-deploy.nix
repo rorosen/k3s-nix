@@ -1,3 +1,5 @@
+# Starts a server and an agent node, waits for the deployments to be ready and checks that they
+# are healthy.
 {
   name = "k3snix-auto-deploy";
   passthru.platforms = [

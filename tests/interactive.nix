@@ -1,7 +1,5 @@
 # Allow for a uniform debugging experience by enabling ssh + port forwarding in interactive mode.
-# Access test nodes via
-# `ssh -o "UserKnownHostsFile=/dev/null" -o "StrictHostKeyChecking=no" root@localhost -p x0022`
-# where x is the number of the node in the test.
+# Access test nodes via `ssh root@localhost -p x0022` where x is the number of the node in the test.
 { config, ... }:
 {
   services.openssh = {

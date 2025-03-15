@@ -10,11 +10,11 @@
         (
           { config, ... }:
           {
-            # our deployments need more resources than the default
+            # The cluster needs more resources than the default
             virtualisation.cores = 2;
             virtualisation.memorySize = 2048;
             virtualisation.diskSize = 4096;
-            # run tests always offline
+            # Run tests always offline
             virtualisation.restrictNetwork = true;
             services.k3s.extraFlags = [
               # The interface selection logic of flannel would normally use eth0, as the nixos
