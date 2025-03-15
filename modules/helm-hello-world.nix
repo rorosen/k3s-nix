@@ -34,10 +34,7 @@ in
       hello-world.content = {
         apiVersion = "helm.cattle.io/v1";
         kind = "HelmChart";
-        metadata = {
-          name = "hello-world";
-          namespace = "kube-system";
-        };
+        metadata.name = "hello-world";
         spec = {
           # the chart name (hello-world) has to match the key that is used in services.k3s.charts
           chart = "https://%{KUBERNETES_API}%/static/charts/hello-world.tgz";
