@@ -2,7 +2,9 @@
 {
   imports = [
     ./modules/grafana.nix
+    # Use the legacy version, if you use an older revision of nixpkgs.
     ./modules/helm-hello-world.nix
+    # ./modules/legacy-helm-hello-world.nix
     ./modules/node-exporter.nix
     ./modules/prometheus.nix
     ./modules/secrets.nix
