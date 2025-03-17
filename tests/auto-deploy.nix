@@ -2,10 +2,7 @@
 # are healthy.
 {
   name = "k3snix-auto-deploy";
-  passthru.platforms = [
-    "x86_64-linux"
-    "aarch64-linux"
-  ];
+  passthru.platforms = [ "x86_64-linux" ];
 
   nodes = {
     server.imports = [ ../server.nix ];

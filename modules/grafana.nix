@@ -9,6 +9,7 @@ let
     imageDigest = "sha256:5781759b3d27734d4d548fcbaf60b1180dbf4290e708f01f292faa6ae764c5e6";
     hash = "sha256-iGjaomEOMNgixw8iJC0c4HWhUBXcKZcsnV1XfB+ctMs=";
     finalImageTag = "11.5.1";
+    arch = "amd64";
   };
   prometheusServiceCfg = config.services.k3s.manifests.prometheus-service.content;
   prometheusServiceName = prometheusServiceCfg.metadata.name;

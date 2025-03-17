@@ -71,6 +71,11 @@ cluster.
 
 ## Test it
 
+> [!NOTE]
+> The container images for the test are pulled for `x86_64-linux` only. Thus the test currently
+> doesn't work on other systems, although it can adapted for `aarch64-linux` by pulling the right
+> container images.
+
 This flake provides an [auto deploy test](./tests/auto-deploy.nix) that starts the cluster and
 checks that the deployments are healthy. You can also use an interactive test driver that lets you
 explore the cluster. Build it with `nix build .#checks.x86_64-linux.autoDeploy.driverInteractive`

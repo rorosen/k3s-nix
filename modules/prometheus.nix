@@ -8,6 +8,7 @@ let
     imageDigest = "sha256:6559acbd5d770b15bb3c954629ce190ac3cbbdb2b7f1c30f0385c4e05104e218";
     hash = "sha256-3A9E+joDExH1JL3QsEWTse8EqaIjjzlKhgsU5U2LWiQ=";
     finalImageTag = "v3.1.0";
+    arch = "amd64";
   };
 in
 {
