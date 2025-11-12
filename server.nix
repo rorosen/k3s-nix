@@ -70,7 +70,7 @@
   services.k3s = {
     enable = true;
     tokenFile = config.sops.secrets.k3s-token.path;
-    images = [ config.services.k3s.package.airgapImages ];
+    images = [ config.services.k3s.package.airgap-images ];
     extraFlags = [
       "--embedded-registry"
       "--disable metrics-server"
