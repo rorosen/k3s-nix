@@ -139,9 +139,4 @@ change the secrets.
 Install Helm charts via the
 [k3s Helm controller](https://docs.k3s.io/helm?_highlight=helm#using-the-helm-controller) with the
 `services.k3s.autoDeployCharts` option. See
-[./modules/helm-hello-world.nix](./modules/helm-hello-world.nix) for an example. However, after
-using k3s with Nix for a while, I prefer writing NixOS modules for deployments over using Helm.
-
-Note that the `services.k3s.autoDeployCharts` option is only available with recent revisions of
-`nixos-unstable`. See [./modules/legacy-helm-hello-world.nix](./modules/legacy-helm-hello-world.nix)
-if you want to use an older version of nixpkgs.
+[./modules/helm-hello-world.nix](./modules/helm-hello-world.nix) for an example
