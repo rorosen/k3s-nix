@@ -6,9 +6,9 @@
 let
   image = pkgs.dockerTools.pullImage {
     imageName = "docker.io/grafana/grafana";
-    imageDigest = "sha256:5781759b3d27734d4d548fcbaf60b1180dbf4290e708f01f292faa6ae764c5e6";
-    hash = "sha256-iGjaomEOMNgixw8iJC0c4HWhUBXcKZcsnV1XfB+ctMs=";
-    finalImageTag = "11.5.1";
+    imageDigest = "sha256:408c41e88a0e3a7af1297cdd0b2b2ac19cc16f094d6a6eaea3bdf63ef67df75c";
+    hash = "sha256-47mFJYg0lnVGx+eJFyPNFiOsZcTMeJpFpjx+MJIVZPo=";
+    finalImageTag = "12.4.0-19291686361";
     arch = "amd64";
   };
   prometheusServiceCfg = config.services.k3s.manifests.prometheus-service.content;
@@ -41,12 +41,12 @@ let
     ];
   };
   nodeExporterDashboard = pkgs.fetchurl {
-    url = "https://grafana.com/api/dashboards/1860/revisions/37/download";
-    hash = "sha256-1DE1aaanRHHeCOMWDGdOS1wBXxOF84UXAjJzT5Ek6mM=";
+    url = "https://grafana.com/api/dashboards/1860/revisions/42/download";
+    hash = "sha256-pNgn6xgZBEu6LW0lc0cXX2gRkQ8lg/rer34SPE3yEl4=";
   };
   k8sApiServerDashboard = pkgs.fetchurl {
-    url = "https://grafana.com/api/dashboards/15761/revisions/19/download";
-    hash = "sha256-j9npTKREjw+sPnAuqnzG+iHrzA9N/TfDq8y3Q6Rceyg=";
+    url = "https://grafana.com/api/dashboards/15761/revisions/20/download";
+    hash = "sha256-u1gU0kSYM9bRwb7CQYyN1iMtGyCb/Y+OHKUwB8hxHHI=";
   };
   dashboards = {
     "node-exporter.json" = builtins.readFile nodeExporterDashboard;

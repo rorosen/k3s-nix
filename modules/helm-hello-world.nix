@@ -4,9 +4,9 @@
 let
   image = pkgs.dockerTools.pullImage {
     imageName = "nginx";
-    imageDigest = "sha256:4ff102c5d78d254a6f0da062b3cf39eaf07f01eec0927fd21e219d0af8bc0591";
-    hash = "sha256-Fh9hWQWgY4g+Cu/0iER4cXAMvCc0JNiDwGCPa+V/FvA=";
-    finalImageTag = "1.27.4-alpine";
+    imageDigest = "sha256:b3c656d55d7ad751196f21b7fd2e8d4da9cb430e32f646adcf92441b72f82b14";
+    hash = "sha256-qrQIBp2EbKw3Aicu424rbu26v2T1LZgHVQ+hJKKZQxE=";
+    finalImageTag = "1.29.3-alpine";
     arch = "amd64";
   };
 in
