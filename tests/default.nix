@@ -21,7 +21,7 @@
               # testing driver sets a default route via dev eth0. However, in test setups we
               # have to use eth1 on all nodes for inter-node communication.
               "--flannel-iface eth1"
-              # Use the IP an eth1 as node IP
+              # Use the IP of eth1 as node IP
               "--node-ip ${config.networking.primaryIPAddress}"
             ];
             # Enable the embedded registry mirror for all registries.
