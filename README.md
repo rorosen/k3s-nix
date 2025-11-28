@@ -117,6 +117,16 @@ You can get a kubeconfig and use it to access the cluster externally. Copy the k
 `scp -P 20022 root@localhost:/etc/rancher/k3s/k3s.yaml ~/.kube/config` and modify the server port
 with `sed -i 's/:6443/:26443/' ~/.kube/config`.
 
+### Troubleshooting
+
+The test may crash with really weird I/O errors. This usually means that the tmpfs, which the
+testing driver uses as backing storage for test VMs, has no space left. You can increase the tmpfs
+size temporary, adapt the command if necessary.
+
+```bash
+sudo mount -o remount,size=6G /run/user/1000
+```
+
 ## Deploy secrets
 
 > [!IMPORTANT]
