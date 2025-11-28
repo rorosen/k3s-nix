@@ -13,7 +13,7 @@
             # The cluster needs more resources than the default
             virtualisation.cores = 2;
             virtualisation.memorySize = 2048;
-            virtualisation.diskSize = 4096;
+            virtualisation.diskSize = 6144;
             # Run tests always offline
             virtualisation.restrictNetwork = true;
             services.k3s.extraFlags = [
