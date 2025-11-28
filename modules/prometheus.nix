@@ -5,9 +5,9 @@
 let
   image = pkgs.dockerTools.pullImage {
     imageName = "quay.io/prometheus/prometheus";
-    imageDigest = "sha256:6559acbd5d770b15bb3c954629ce190ac3cbbdb2b7f1c30f0385c4e05104e218";
-    hash = "sha256-3A9E+joDExH1JL3QsEWTse8EqaIjjzlKhgsU5U2LWiQ=";
-    finalImageTag = "v3.1.0";
+    imageDigest = "sha256:49214755b6153f90a597adcbff0252cc61069f8ab69ce8411285cd4a560e8038";
+    hash = "sha256-FiRygVk9FRRKsHA4kpkiDre2ORLYI7CSkV7+odUcBSw=";
+    finalImageTag = "v3.7.3";
     arch = "amd64";
   };
 in

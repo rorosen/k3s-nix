@@ -117,6 +117,16 @@ You can get a kubeconfig and use it to access the cluster externally. Copy the k
 `scp -P 20022 root@localhost:/etc/rancher/k3s/k3s.yaml ~/.kube/config` and modify the server port
 with `sed -i 's/:6443/:26443/' ~/.kube/config`.
 
+### Troubleshooting
+
+The test may crash with really weird I/O errors. This usually means that the tmpfs, which the
+testing driver uses as backing storage for test VMs, has no space left. You can increase the tmpfs
+size temporary, adapt the command if necessary.
+
+```bash
+sudo mount -o remount,size=6G /run/user/1000
+```
+
 ## Deploy secrets
 
 > [!IMPORTANT]
@@ -139,9 +149,4 @@ change the secrets.
 Install Helm charts via the
 [k3s Helm controller](https://docs.k3s.io/helm?_highlight=helm#using-the-helm-controller) with the
 `services.k3s.autoDeployCharts` option. See
-[./modules/helm-hello-world.nix](./modules/helm-hello-world.nix) for an example. However, after
-using k3s with Nix for a while, I prefer writing NixOS modules for deployments over using Helm.
-
-Note that the `services.k3s.autoDeployCharts` option is only available with recent revisions of
-`nixos-unstable`. See [./modules/legacy-helm-hello-world.nix](./modules/legacy-helm-hello-world.nix)
-if you want to use an older version of nixpkgs.
+[./modules/helm-hello-world.nix](./modules/helm-hello-world.nix) for an example
